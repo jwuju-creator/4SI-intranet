@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. USERS & ORG
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE users (
 );
 
 -- 2. JOBS (RECRUITING)
-CREATE TABLE jobs (
+CREATE TABLE IF NOT EXISTS jobs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     department TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE jobs (
 );
 
 -- 3. CANDIDATES
-CREATE TABLE candidates (
+CREATE TABLE IF NOT EXISTS candidates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     job_id UUID REFERENCES jobs(id),
     name TEXT NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE candidates (
 );
 
 -- 4. TIME & ABSENCE
-CREATE TABLE time_entries (
+CREATE TABLE IF NOT EXISTS time_entries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id),
     date DATE NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE time_entries (
 );
 
 -- 5. REQUESTS (Inbox/Workflow)
-CREATE TABLE requests (
+CREATE TABLE IF NOT EXISTS requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     requester_id UUID REFERENCES users(id),
     type TEXT CHECK (type IN ('leave', 'expense', 'ticket', 'profile')),
@@ -75,7 +75,7 @@ CREATE TABLE requests (
 );
 
 -- 6. POSTS (Feed)
-CREATE TABLE posts (
+CREATE TABLE IF NOT EXISTS posts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     author_id UUID REFERENCES users(id),
     content TEXT NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE posts (
 );
 
 -- 7. GOALS
-CREATE TABLE goals (
+CREATE TABLE IF NOT EXISTS goals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id),
     title TEXT NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE goals (
 
 -- 8. AUTHENTICATION (Login Topic)
 -- Stores hashed passwords and login metadata if not using external Auth provider strictly
-CREATE TABLE auth_credentials (
+CREATE TABLE IF NOT EXISTS auth_credentials (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
     password_hash TEXT NOT NULL,
     last_login_at TIMESTAMP,
@@ -104,7 +104,7 @@ CREATE TABLE auth_credentials (
 );
 
 -- Active sessions for handling multiple devices/logins
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     token TEXT UNIQUE NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE sessions (
 );
 
 -- Granular permissions beyond simple Roles
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     role TEXT NOT NULL, -- Maps to users.role
     resource TEXT NOT NULL, -- e.g. 'payroll', 'performance', 'settings'
@@ -124,7 +124,7 @@ CREATE TABLE permissions (
 );
 
 -- Audit Log for Security/Compliance (Login attempts, Sensitive data access)
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     actor_id UUID REFERENCES users(id),
     event TEXT NOT NULL, -- 'login.success', 'login.failed', 'salary.view'
@@ -133,7 +133,3 @@ CREATE TABLE audit_logs (
     metadata JSONB,
     created_at TIMESTAMP DEFAULT NOW()
 );
-
--- RLS (Row Level Security) Templates (Optional for later)
--- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
--- CREATE POLICY "Users can view their own profile" ON users FOR SELECT USING (auth.uid() = id);

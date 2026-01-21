@@ -1,23 +1,33 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Briefcase, Calendar, FileText, Settings, 
-  Layout, Home, Clock, PieChart, Bell, CheckCircle, 
-  XCircle, ChevronRight, UserPlus, Search, 
+  Layout, Home, Clock, Heart, Award, CheckCircle, 
+  ChevronRight, UserPlus, Search, 
   MoreHorizontal, MapPin, Building, DollarSign,
-  Download, Upload, Edit3, Trash2, Filter,
-  Target, Zap, GitBranch, MessageSquare, Heart, Award,
-  List, TrendingUp, X, CreditCard, Laptop, Send, Megaphone, Plus,
-  Phone, Mail, Linkedin, Star, ThumbsUp, ThumbsDown, ArrowRight,
-  ChevronDown, ChevronUp, ZoomIn, ZoomOut, Maximize, Move, CornerDownRight,
-  Inbox, LifeBuoy, Gift, Calculator, Banknote, History,
-  Shield, Landmark, AlertCircle, Monitor, Server, Wifi, Box, Wrench,
-  Globe, UserCheck, Paperclip, Clock3, RotateCcw, PenTool, BookOpen, Coffee, Music, Smile,
+  Target, Zap, GitBranch, MessageSquare,
+  List, TrendingUp, X, CreditCard, Laptop, Megaphone, Plus,
+  Phone, Mail, Star, ArrowRight,
+  ZoomIn, ZoomOut, Move, CornerDownRight,
+  Inbox, LifeBuoy, Calculator, Banknote,
+  Landmark, AlertCircle, Monitor, Server,
+  UserCheck, Paperclip, PenTool, BookOpen, Coffee, Music, Smile,
   Sliders, Lock, Share2, ArrowLeft, Image as ImageIcon,
-  Edit, Eye, Copy, Globe as GlobeIcon, Grid, List as ListIcon,
+  Grid, List as ListIcon,
   CreditCard as BillingIcon, Key as KeyIcon, Bell as BellIcon,
-  LogOut, LockKeyhole
+  LogOut, LockKeyhole, Globe as GlobeIcon
 } from 'lucide-react';
-import { supabase } from './supabaseClient';
+
+// --- SHARED COMPONENTS ---
+
+const SuiteLogo = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4000 4000" className={className}>
+    <path fill="#fff" d="M3999.74,678v2598.84H-86V678h4085.74ZM3752.65,943.52c-40.1-44.12-99.17-70.49-158.32-76.75l-2744.09,1.12L109.49,1882.4l-.52,995.25c9.62,117.03,109.45,205.58,224.82,212.47h3254.4c120.68-7.46,216.53-102.1,224.82-222.73-1.9-601.26,3.38-1203.02-2.65-1803.98-9.18-44.32-27.12-86.26-57.69-119.89Z"/>
+    <path d="M3752.65,943.52c30.57,33.63,48.51,75.57,57.69,119.89,6.04,600.95.75,1202.71,2.65,1803.98-8.29,120.63-104.13,215.27-224.82,222.73H333.78c-115.37-6.88-215.19-95.43-224.82-212.47l.52-995.25,740.76-1014.51,2744.09-1.12c59.15,6.26,118.22,32.63,158.32,76.75ZM2086.22,2131.38h-663.16l-2.05-874.49h-274.09c-175.58,237.56-347.37,477.83-521.66,716.26-32.78,44.84-68.96,88.65-98.31,135.34-2.54,76.27-.58,152.7,1.03,229.11.47,22.22-1,44.96-.08,66.8h587.2v290.47l3.08,3.08h299.76c4.58,0,3.08-6.01,3.08-7.18v-283.29l3.08-3.08h369.56c33.36,74.95,77.6,142.83,141.73,194.95,153.75,124.95,397.12,152.35,586.5,112.33,245.43-51.87,394.38-241.05,371.2-495.09-27.46-301.07-342.17-355.31-573.91-438.22-55.6-19.89-144.5-50.43-160.14-114.97-40.1-165.52,203.28-205.37,307.66-131.07,46.41,33.04,66.45,86.28,73.27,141.26h335.69c2.09-1.54,2.23-1.79,2.23-4.19.05-37.52-14.74-96.83-27.87-132.35-97.45-263.77-380.23-349.53-638.94-302.11-257.72,47.24-436.93,228.07-399.69,503.02,36.24,267.55,313.41,312.41,524.83,382.59,98.55,32.72,241.45,79.98,206.84,214.06-27.39,106.1-168.32,126.29-260.17,110.23-114.06-19.94-177.71-95.81-194.5-207.88-5.16-34.43-.64-70.81-2.18-105.6ZM3377.64,2695.9v-1435.93l-3.08-3.08h-345.95v1441.06l349.03-2.05Z"/>
+    <path fill="#fff" d="M2086.22,2131.38c1.54,34.78-2.98,71.17,2.18,105.6,16.79,112.07,80.44,187.94,194.5,207.88,91.85,16.06,232.77-4.13,260.17-110.23,34.62-134.08-108.28-181.34-206.84-214.06-211.42-70.18-488.59-115.04-524.83-382.59-37.24-274.96,141.96-455.78,399.69-503.02,258.71-47.42,541.49,38.35,638.94,302.11,13.12,35.52,27.92,94.83,27.87,132.35,0,2.4-.14,2.66-2.23,4.19h-335.69c-6.81-54.98-26.86-108.23-73.27-141.26-104.38-74.3-347.76-34.46-307.66,131.07,15.63,64.53,104.54,95.08,160.14,114.97,231.74,82.91,546.44,137.14,573.91,438.22,23.17,254.04-125.77,443.23-371.2,495.09-189.38,40.02-432.75,12.62-586.5-112.33-64.13-52.12-108.37-120-141.73-194.95h-369.56l-3.08,3.08v283.29c0,1.17,1.5,7.18-3.08,7.18h-299.76l-3.08-3.08v-290.47h-587.2c-.92-21.85.55-44.58.08-66.8-1.61-76.41-3.57-152.84-1.03-229.11,29.35-46.69,65.53-90.5,98.31-135.34,174.3-238.43,346.08-478.7,521.66-716.26h274.09l2.05,874.49h663.16ZM1115.09,1659.24c-3.89-.78-4.94,1.92-7.02,4.28-11.26,12.79-23.97,38.86-34,54.27-83.07,127.62-166.67,255.72-247.27,385.03-6.35,10.19-13.34,20.31-17.65,31.62l305.94-2.03v-473.17Z"/>
+    <polygon fill="#fff" points="3377.64 2695.9 3028.61 2697.95 3028.61 1256.89 3374.56 1256.89 3377.64 1259.97 3377.64 2695.9"/>
+    <path d="M1115.09,1659.24v473.17l-305.94,2.03c4.3-11.31,11.3-21.44,17.65-31.62,80.6-129.31,164.2-257.41,247.27-385.03,10.03-15.42,22.75-41.49,34-54.27,2.07-2.35,3.13-5.06,7.02-4.28Z"/>
+  </svg>
+);
 
 // --- TYPES ---
 
@@ -419,7 +429,9 @@ const AuthView = ({ onLogin }: { onLogin: (isAdmin: boolean) => void }) => {
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
                 <div className="p-8">
                     <div className="flex justify-center mb-6">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">HR</div>
+                         <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-2">
+                             <SuiteLogo className="w-full h-full" />
+                         </div>
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">
                         {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
@@ -2559,7 +2571,9 @@ export default function App() {
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans">
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
         <div className="p-6 flex items-center gap-2 border-b border-slate-50">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">HR</div>
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center p-1.5">
+             <SuiteLogo className="w-full h-full" />
+          </div>
           <span className="font-bold text-lg tracking-tight">Suite.io</span>
         </div>
         <div className="px-4 py-4">
@@ -2768,90 +2782,4 @@ export default function App() {
 
        <Modal isOpen={activeModal === 'candidate'} onClose={handleCloseModal} title="Add Candidate">
          <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "New Candidate")}>
-            <input name="name" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Candidate Name" required/>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Add</button>
-            </div>
-         </form>
-       </Modal>
-
-      <Modal isOpen={activeModal === 'leave'} onClose={handleCloseModal} title="Request Leave">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Leave Request")}>
-            <select name="type" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Vacation</option><option>Sick Leave</option></select>
-            <div className="grid grid-cols-2 gap-4">
-               <input name="startDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
-               <input name="endDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'expense'} onClose={handleCloseModal} title="Submit Expense">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Expense Report")}>
-            <input name="amount" type="number" step="0.01" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Amount" required/>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'referral'} onClose={handleCloseModal} title="Refer a Friend">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Referral")}>
-            <input name="name" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Candidate Name" required/>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
-            </div>
-         </form>
-      </Modal>
-
-       <Modal isOpen={activeModal === 'ticket'} onClose={handleCloseModal} title="Create IT Ticket">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Ticket")}>
-            <textarea name="desc" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-32 bg-white text-slate-900" placeholder="Describe the issue..." required></textarea>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create</button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'asset'} onClose={handleCloseModal} title="Add New Asset">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "New Asset")}>
-            <div className="grid grid-cols-2 gap-4">
-                <select name="assetType" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Laptop</option><option>Monitor</option><option>Phone</option></select>
-                <select name="status" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Available</option><option>In Use</option><option>Repair</option></select>
-            </div>
-            <input name="model" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Model" required/>
-            <div className="grid grid-cols-2 gap-4">
-                <input name="serialNumber" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Serial" required/>
-                <input name="purchaseDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Add</button>
-            </div>
-         </form>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'assign-asset'} onClose={handleCloseModal} title="Assign Asset">
-         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Assign Asset")}>
-            <select name="userId" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required>
-                  <option value="">Select Employee</option>
-                  {users.map(u => (<option key={u.id} value={u.id}>{u.name}</option>))}
-            </select>
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Assign</button>
-            </div>
-         </form>
-      </Modal>
-
-      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
-    </div>
-  );
-}
+            <input name="name" type="
