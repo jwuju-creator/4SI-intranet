@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,9 +6,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HR Suite | Hub, Admin & Recruiting</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body { font-family: 'Inter', sans-serif; }
+    
+    <!-- Tailwind CDN for immediate styling fix -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              sidebar: {
+                bg: '#111827',
+                text: '#9CA3AF',
+                active: '#FFFFFF',
+              }
+            }
+          },
+        },
+      }
+    </script>
+    
+    <!-- Custom Styles processed by Tailwind CDN -->
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .layout-shell {
+          display: flex;
+          height: 100vh;
+          width: 100vw;
+          overflow: hidden;
+          background-color: #F3F4F6;
+        }
+
+        .sidebar {
+          @apply bg-gray-900 text-gray-400 flex flex-col w-64 flex-shrink-0 h-full border-r border-gray-800 transition-all duration-300;
+        }
+
+        .main-content {
+          @apply flex-1 flex flex-col min-w-0 bg-gray-50 overflow-hidden relative;
+        }
+
+        .card {
+          @apply bg-white border border-gray-200 rounded-lg shadow-sm transition-shadow hover:shadow-md;
+        }
+
+        .btn-primary {
+          @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 text-sm;
+        }
+
+        .btn-secondary {
+          @apply bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-medium px-4 py-2 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 text-sm;
+        }
+
+        .nav-item {
+          @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer mx-2 mb-1;
+        }
+
+        .nav-item:hover {
+          @apply bg-gray-800 text-white;
+        }
+
+        .nav-item.active {
+          @apply bg-indigo-600 text-white shadow-md;
+        }
+
+        .nav-section-title {
+          @apply px-5 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider;
+        }
+
+        .input-field {
+          @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 bg-white;
+        }
+
+        /* Status Badges */
+        .badge {
+          @apply px-2 py-0.5 rounded-full text-xs font-bold inline-flex items-center;
+        }
+        .badge-success { @apply bg-emerald-100 text-emerald-800; }
+        .badge-warning { @apply bg-amber-100 text-amber-800; }
+        .badge-error { @apply bg-rose-100 text-rose-800; }
+        .badge-info { @apply bg-blue-100 text-blue-800; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #CBD5E1;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94A3B8;
+        }
+      }
     </style>
+
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.91.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0"
+  }
+}
+</script>
   <link rel="stylesheet" href="/index.css">
 </head>
   <body>

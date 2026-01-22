@@ -1,33 +1,24 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Users, Briefcase, Calendar, FileText, Settings, 
-  Layout, Home, Clock, Heart, Award, CheckCircle, 
-  ChevronRight, UserPlus, Search, 
+  Layout, Home, Clock, PieChart, Bell, CheckCircle, 
+  XCircle, ChevronRight, UserPlus, Search, 
   MoreHorizontal, MapPin, Building, DollarSign,
-  Target, Zap, GitBranch, MessageSquare,
-  List, TrendingUp, X, CreditCard, Laptop, Megaphone, Plus,
-  Phone, Mail, Star, ArrowRight,
-  ZoomIn, ZoomOut, Move, CornerDownRight,
-  Inbox, LifeBuoy, Calculator, Banknote,
-  Landmark, AlertCircle, Monitor, Server,
-  UserCheck, Paperclip, PenTool, BookOpen, Coffee, Music, Smile,
+  Download, Upload, Edit3, Trash2, Filter,
+  Target, Zap, GitBranch, MessageSquare, Heart, Award,
+  List, TrendingUp, X, CreditCard, Laptop, Send, Megaphone, Plus,
+  Phone, Mail, Linkedin, Star, ThumbsUp, ThumbsDown, ArrowRight,
+  ChevronDown, ChevronUp, ZoomIn, ZoomOut, Maximize, Move, CornerDownRight,
+  Inbox, LifeBuoy, Gift, Calculator, Banknote, History,
+  Shield, Landmark, AlertCircle, Monitor, Server, Wifi, Box, Wrench,
+  Globe, UserCheck, Paperclip, Clock3, RotateCcw, PenTool, BookOpen, Coffee, Music, Smile,
   Sliders, Lock, Share2, ArrowLeft, Image as ImageIcon,
-  Grid, List as ListIcon,
+  Edit, Eye, Copy, Globe as GlobeIcon, Grid, List as ListIcon,
   CreditCard as BillingIcon, Key as KeyIcon, Bell as BellIcon,
-  LogOut, LockKeyhole, Globe as GlobeIcon
+  LogOut, LockKeyhole, Sparkles, Webhook
 } from 'lucide-react';
-
-// --- SHARED COMPONENTS ---
-
-const SuiteLogo = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4000 4000" className={className}>
-    <path fill="#fff" d="M3999.74,678v2598.84H-86V678h4085.74ZM3752.65,943.52c-40.1-44.12-99.17-70.49-158.32-76.75l-2744.09,1.12L109.49,1882.4l-.52,995.25c9.62,117.03,109.45,205.58,224.82,212.47h3254.4c120.68-7.46,216.53-102.1,224.82-222.73-1.9-601.26,3.38-1203.02-2.65-1803.98-9.18-44.32-27.12-86.26-57.69-119.89Z"/>
-    <path d="M3752.65,943.52c30.57,33.63,48.51,75.57,57.69,119.89,6.04,600.95.75,1202.71,2.65,1803.98-8.29,120.63-104.13,215.27-224.82,222.73H333.78c-115.37-6.88-215.19-95.43-224.82-212.47l.52-995.25,740.76-1014.51,2744.09-1.12c59.15,6.26,118.22,32.63,158.32,76.75ZM2086.22,2131.38h-663.16l-2.05-874.49h-274.09c-175.58,237.56-347.37,477.83-521.66,716.26-32.78,44.84-68.96,88.65-98.31,135.34-2.54,76.27-.58,152.7,1.03,229.11.47,22.22-1,44.96-.08,66.8h587.2v290.47l3.08,3.08h299.76c4.58,0,3.08-6.01,3.08-7.18v-283.29l3.08-3.08h369.56c33.36,74.95,77.6,142.83,141.73,194.95,153.75,124.95,397.12,152.35,586.5,112.33,245.43-51.87,394.38-241.05,371.2-495.09-27.46-301.07-342.17-355.31-573.91-438.22-55.6-19.89-144.5-50.43-160.14-114.97-40.1-165.52,203.28-205.37,307.66-131.07,46.41,33.04,66.45,86.28,73.27,141.26h335.69c2.09-1.54,2.23-1.79,2.23-4.19.05-37.52-14.74-96.83-27.87-132.35-97.45-263.77-380.23-349.53-638.94-302.11-257.72,47.24-436.93,228.07-399.69,503.02,36.24,267.55,313.41,312.41,524.83,382.59,98.55,32.72,241.45,79.98,206.84,214.06-27.39,106.1-168.32,126.29-260.17,110.23-114.06-19.94-177.71-95.81-194.5-207.88-5.16-34.43-.64-70.81-2.18-105.6ZM3377.64,2695.9v-1435.93l-3.08-3.08h-345.95v1441.06l349.03-2.05Z"/>
-    <path fill="#fff" d="M2086.22,2131.38c1.54,34.78-2.98,71.17,2.18,105.6,16.79,112.07,80.44,187.94,194.5,207.88,91.85,16.06,232.77-4.13,260.17-110.23,34.62-134.08-108.28-181.34-206.84-214.06-211.42-70.18-488.59-115.04-524.83-382.59-37.24-274.96,141.96-455.78,399.69-503.02,258.71-47.42,541.49,38.35,638.94,302.11,13.12,35.52,27.92,94.83,27.87,132.35,0,2.4-.14,2.66-2.23,4.19h-335.69c-6.81-54.98-26.86-108.23-73.27-141.26-104.38-74.3-347.76-34.46-307.66,131.07,15.63,64.53,104.54,95.08,160.14,114.97,231.74,82.91,546.44,137.14,573.91,438.22,23.17,254.04-125.77,443.23-371.2,495.09-189.38,40.02-432.75,12.62-586.5-112.33-64.13-52.12-108.37-120-141.73-194.95h-369.56l-3.08,3.08v283.29c0,1.17,1.5,7.18-3.08,7.18h-299.76l-3.08-3.08v-290.47h-587.2c-.92-21.85.55-44.58.08-66.8-1.61-76.41-3.57-152.84-1.03-229.11,29.35-46.69,65.53-90.5,98.31-135.34,174.3-238.43,346.08-478.7,521.66-716.26h274.09l2.05,874.49h663.16ZM1115.09,1659.24c-3.89-.78-4.94,1.92-7.02,4.28-11.26,12.79-23.97,38.86-34,54.27-83.07,127.62-166.67,255.72-247.27,385.03-6.35,10.19-13.34,20.31-17.65,31.62l305.94-2.03v-473.17Z"/>
-    <polygon fill="#fff" points="3377.64 2695.9 3028.61 2697.95 3028.61 1256.89 3374.56 1256.89 3377.64 1259.97 3377.64 2695.9"/>
-    <path d="M1115.09,1659.24v473.17l-305.94,2.03c4.3-11.31,11.3-21.44,17.65-31.62,80.6-129.31,164.2-257.41,247.27-385.03,10.03-15.42,22.75-41.49,34-54.27,2.07-2.35,3.13-5.06,7.02-4.28Z"/>
-  </svg>
-);
+import { supabase } from './supabaseClient';
+import { GoogleGenAI } from "@google/genai";
 
 // --- TYPES ---
 
@@ -109,7 +100,7 @@ interface GroupPost {
     date: string;
     likes: number;
     comments: number;
-    isLiked?: boolean; // Added for interactivity
+    isLiked?: boolean; 
 }
 
 interface Goal {
@@ -122,8 +113,8 @@ interface Goal {
 
 interface Skill {
     name: string;
-    level: number; // 1-5
-    target: number; // 1-5
+    level: number; 
+    target: number; 
 }
 
 interface Request {
@@ -163,7 +154,7 @@ interface Asset {
     type: 'Laptop' | 'Monitor' | 'Phone' | 'Peripheral';
     model: string;
     serialNumber: string;
-    assignedTo?: string; // userId
+    assignedTo?: string; 
     status: 'In Use' | 'Available' | 'Repair' | 'Retired';
     purchaseDate: string;
 }
@@ -185,7 +176,7 @@ interface Event {
     time: string;
     location: string;
     type: 'Company' | 'Social';
-    groupId?: string; // Optional link to a group
+    groupId?: string; 
 }
 
 interface PerformanceCycle {
@@ -390,6 +381,101 @@ const Toast = ({ message, onClose }: { message: string | null, onClose: () => vo
   );
 };
 
+// Smart Assistant Component (Using Google GenAI)
+const SmartAssistant = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    const userMsg = input;
+    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    setInput('');
+    setLoading(true);
+
+    try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: userMsg,
+        });
+        setMessages(prev => [...prev, { role: 'model', text: response.text || "I couldn't generate a response." }]);
+    } catch (e) {
+        setMessages(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error connecting to the AI service." }]);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+  return (
+    <div className="fixed bottom-20 right-6 w-96 bg-white rounded-2xl shadow-2xl border border-indigo-100 flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white">
+          <div className="flex items-center gap-2 font-bold">
+             <Sparkles size={18} className="text-yellow-300 fill-yellow-300"/> PeopleOS AI
+          </div>
+          <button onClick={onClose} className="hover:bg-white/20 rounded-full p-1 transition-colors"><X size={18}/></button>
+       </div>
+       <div className="flex-1 p-4 bg-slate-50 min-h-[300px] max-h-[400px] overflow-y-auto space-y-4">
+          {messages.length === 0 && (
+             <div className="flex gap-3">
+                 <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0">AI</div>
+                 <div className="bg-white p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 shadow-sm border border-slate-100">
+                    Hi there! I can help you with company policies, your personal data, or finding colleagues. What do you need today?
+                 </div>
+             </div>
+          )}
+          
+          {messages.map((m, i) => (
+             <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${m.role === 'user' ? 'bg-slate-200 text-slate-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                    {m.role === 'user' ? 'ME' : 'AI'}
+                 </div>
+                 <div className={`p-3 rounded-2xl text-sm shadow-sm ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-700 rounded-tl-none border border-slate-100'}`}>
+                    {m.text}
+                 </div>
+             </div>
+          ))}
+
+          {loading && (
+             <div className="flex gap-3">
+                 <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0">AI</div>
+                 <div className="bg-white p-3 rounded-2xl rounded-tl-none text-sm text-slate-700 shadow-sm border border-slate-100 flex gap-1 items-center">
+                    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-75"></span>
+                    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-150"></span>
+                 </div>
+             </div>
+          )}
+          <div ref={messagesEndRef} />
+       </div>
+       <div className="p-3 bg-white border-t border-slate-100">
+          <div className="relative">
+             <input 
+                type="text" 
+                placeholder="Ask anything..." 
+                className="w-full bg-slate-50 border border-slate-200 rounded-full pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSend()}
+             />
+             <button onClick={handleSend} className="absolute right-2 top-1.5 p-1 bg-indigo-600 rounded-full text-white hover:bg-indigo-700"><ArrowRight size={14}/></button>
+          </div>
+       </div>
+    </div>
+  );
+};
+
 // --- AUTH COMPONENTS ---
 
 const AuthView = ({ onLogin }: { onLogin: (isAdmin: boolean) => void }) => {
@@ -412,13 +498,11 @@ const AuthView = ({ onLogin }: { onLogin: (isAdmin: boolean) => void }) => {
         } else if (mode === 'signup') {
             // Mock Signup
             if (email && password) {
-                // In a real app, this would create a user in Supabase
                 onLogin(false); // Log in as regular user/demo
             } else {
                 setError('Please fill in all fields');
             }
         } else {
-            // Forgot Password
             alert('Reset link sent to ' + email);
             setMode('login');
         }
@@ -429,9 +513,7 @@ const AuthView = ({ onLogin }: { onLogin: (isAdmin: boolean) => void }) => {
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
                 <div className="p-8">
                     <div className="flex justify-center mb-6">
-                         <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-2">
-                             <SuiteLogo className="w-full h-full" />
-                         </div>
+                        <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">HR</div>
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">
                         {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
@@ -515,7 +597,7 @@ const AuthView = ({ onLogin }: { onLogin: (isAdmin: boolean) => void }) => {
 // --- HUB SUB-PAGES ---
 
 const HubDashboard = ({ currentUser, onAction, isClockedIn, onToggleClock, posts, events }: { currentUser: User, onAction: (action: string) => void, isClockedIn: boolean, onToggleClock: () => void, posts: Post[], events: Event[] }) => (
-  <div className="space-y-6">
+  <div className="space-y-6 animate-in fade-in duration-500">
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Good morning, {currentUser.name.split(' ')[0]}!</h1>
@@ -627,82 +709,125 @@ const HubDashboard = ({ currentUser, onAction, isClockedIn, onToggleClock, posts
   </div>
 );
 
-const HubTime = ({ onAction, timeEntries }: { onAction: (action: string) => void, timeEntries: TimeEntry[] }) => (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold text-slate-900">Time & Absence</h2>
-      <button onClick={() => onAction('leave')} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
-        <UserPlus size={16} /> Request Time Off
-      </button>
-    </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-slate-500 text-xs font-semibold uppercase">Annual Leave</p>
-        <h3 className="text-3xl font-bold text-slate-900 mt-2">18 <span className="text-base text-slate-400 font-normal">/ 30 days</span></h3>
-      </div>
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-slate-500 text-xs font-semibold uppercase">Sick Days</p>
-        <h3 className="text-3xl font-bold text-slate-900 mt-2">3 <span className="text-base text-slate-400 font-normal">days taken</span></h3>
-      </div>
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <p className="text-slate-500 text-xs font-semibold uppercase">Remote Work</p>
-        <h3 className="text-3xl font-bold text-slate-900 mt-2">42 <span className="text-base text-slate-400 font-normal">days taken</span></h3>
-      </div>
-    </div>
+// REFACTORED: HubTime with Team Calendar Switcher
+const HubTime = ({ onAction, timeEntries }: { onAction: (action: string) => void, timeEntries: TimeEntry[] }) => {
+    const [view, setView] = useState<'me' | 'team'>('me');
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 font-semibold text-slate-800">Timesheet (Clock In/Out)</div>
-            <div className="max-h-64 overflow-y-auto">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
-                    <tr>
-                        <th className="px-6 py-3">Date</th>
-                        <th className="px-6 py-3">In</th>
-                        <th className="px-6 py-3">Out</th>
-                        <th className="px-6 py-3">Duration</th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                    {timeEntries.map(entry => (
-                        <tr key={entry.id}>
-                            <td className="px-6 py-3 text-slate-900">{entry.date}</td>
-                            <td className="px-6 py-3 text-slate-600">{entry.in}</td>
-                            <td className="px-6 py-3 text-slate-600">{entry.out || '-'}</td>
-                            <td className="px-6 py-3 text-slate-600">{entry.duration || 'Active'}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-slate-900">Time & Absence</h2>
+                    <div className="bg-slate-100 p-1 rounded-lg flex text-sm font-medium">
+                        <button onClick={() => setView('me')} className={`px-3 py-1.5 rounded-md transition-all ${view === 'me' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>My Overview</button>
+                        <button onClick={() => setView('team')} className={`px-3 py-1.5 rounded-md transition-all ${view === 'team' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Team Calendar</button>
+                    </div>
+                </div>
+                <button onClick={() => onAction('leave')} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <UserPlus size={16} /> Request Time Off
+                </button>
             </div>
-        </div>
+            
+            {view === 'me' ? (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p className="text-slate-500 text-xs font-semibold uppercase">Annual Leave</p>
+                            <h3 className="text-3xl font-bold text-slate-900 mt-2">18 <span className="text-base text-slate-400 font-normal">/ 30 days</span></h3>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p className="text-slate-500 text-xs font-semibold uppercase">Sick Days</p>
+                            <h3 className="text-3xl font-bold text-slate-900 mt-2">3 <span className="text-base text-slate-400 font-normal">days taken</span></h3>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p className="text-slate-500 text-xs font-semibold uppercase">Remote Work</p>
+                            <h3 className="text-3xl font-bold text-slate-900 mt-2">42 <span className="text-base text-slate-400 font-normal">days taken</span></h3>
+                        </div>
+                    </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 font-semibold text-slate-800">Recent Absence Requests</div>
-        <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 font-medium">
-            <tr>
-                <th className="px-6 py-3">Type</th>
-                <th className="px-6 py-3">Dates</th>
-                <th className="px-6 py-3">Status</th>
-            </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-            <tr>
-                <td className="px-6 py-4 font-medium">Vacation</td>
-                <td className="px-6 py-4 text-slate-600">Dec 24 - Dec 31</td>
-                <td className="px-6 py-4"><span className="bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">Pending</span></td>
-            </tr>
-            </tbody>
-        </table>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div className="p-4 border-b border-slate-100 font-semibold text-slate-800">Timesheet (Clock In/Out)</div>
+                            <div className="max-h-64 overflow-y-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
+                                    <tr>
+                                        <th className="px-6 py-3">Date</th>
+                                        <th className="px-6 py-3">In</th>
+                                        <th className="px-6 py-3">Out</th>
+                                        <th className="px-6 py-3">Duration</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                    {timeEntries.map(entry => (
+                                        <tr key={entry.id}>
+                                            <td className="px-6 py-3 text-slate-900">{entry.date}</td>
+                                            <td className="px-6 py-3 text-slate-600">{entry.in}</td>
+                                            <td className="px-6 py-3 text-slate-600">{entry.out || '-'}</td>
+                                            <td className="px-6 py-3 text-slate-600">{entry.duration || 'Active'}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div className="p-4 border-b border-slate-100 font-semibold text-slate-800">Recent Absence Requests</div>
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 text-slate-500 font-medium">
+                                <tr>
+                                    <th className="px-6 py-3">Type</th>
+                                    <th className="px-6 py-3">Dates</th>
+                                    <th className="px-6 py-3">Status</th>
+                                </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                <tr>
+                                    <td className="px-6 py-4 font-medium">Vacation</td>
+                                    <td className="px-6 py-4 text-slate-600">Dec 24 - Dec 31</td>
+                                    <td className="px-6 py-4"><span className="bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">Pending</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm animate-in fade-in">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-bold text-slate-800">Team Availability (November 2023)</h3>
+                        <div className="flex gap-2 text-sm">
+                            <div className="flex items-center gap-1"><div className="w-3 h-3 bg-yellow-100 rounded"></div> Vacation</div>
+                            <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-100 rounded"></div> Sick</div>
+                            <div className="flex items-center gap-1"><div className="w-3 h-3 bg-indigo-100 rounded"></div> Remote</div>
+                        </div>
+                    </div>
+                    {/* Mock Calendar Grid */}
+                    <div className="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                            <div key={d} className="bg-slate-50 p-3 text-center text-xs font-bold text-slate-500 uppercase">{d}</div>
+                        ))}
+                        {Array.from({length: 30}).map((_, i) => (
+                            <div key={i} className={`bg-white h-28 p-2 relative hover:bg-slate-50 transition-colors ${i === 20 ? 'bg-slate-50/50' : ''}`}>
+                                <span className="text-xs font-semibold text-slate-400 absolute top-2 right-2">{i+1}</span>
+                                <div className="mt-4 space-y-1">
+                                    {i === 12 && <div className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-1 rounded truncate border border-yellow-200 font-medium">🌴 John (Vacation)</div>}
+                                    {i === 13 && <div className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-1 rounded truncate border border-yellow-200 font-medium">🌴 John (Vacation)</div>}
+                                    {i === 20 && <div className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-1 rounded truncate border border-blue-200 font-medium">🤧 Sarah (Sick)</div>}
+                                    {i === 24 && <div className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-1 rounded truncate border border-indigo-100 font-medium">🏠 Mike (Remote)</div>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
-    </div>
-  </div>
-);
+    );
+}
 
 const HubGrow = ({ goals, skills, onAddGoal }: { goals: Goal[], skills: Skill[], onAddGoal: () => void }) => (
-  <div className="space-y-8">
+  <div className="space-y-8 animate-in fade-in duration-500">
     <div className="flex justify-between items-center">
       <div>
           <h2 className="text-2xl font-bold text-slate-900">Career & Growth</h2>
@@ -799,54 +924,11 @@ const HubGrow = ({ goals, skills, onAddGoal }: { goals: Goal[], skills: Skill[],
            </div>
        </div>
     </div>
-
-    {/* Promotion Metrics */}
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-8">
-        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><TrendingUp size={20}/> Engineering Career Framework</h3>
-        <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                    <tr>
-                        <th className="px-4 py-3">Level</th>
-                        <th className="px-4 py-3">Scope</th>
-                        <th className="px-4 py-3">Impact</th>
-                        <th className="px-4 py-3">Time in Role</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-600">
-                    <tr>
-                        <td className="px-4 py-3 font-medium text-slate-900">Level 1 (Junior)</td>
-                        <td className="px-4 py-3">Task-based, requires guidance</td>
-                        <td className="px-4 py-3">Individual features</td>
-                        <td className="px-4 py-3">0-2 Years</td>
-                    </tr>
-                    <tr>
-                        <td className="px-4 py-3 font-medium text-slate-900">Level 2 (Mid)</td>
-                        <td className="px-4 py-3">Feature-based, independent</td>
-                        <td className="px-4 py-3">Team velocity</td>
-                        <td className="px-4 py-3">2-4 Years</td>
-                    </tr>
-                    <tr>
-                        <td className="px-4 py-3 font-medium text-slate-900">Level 3 (Senior)</td>
-                        <td className="px-4 py-3">System-based, mentors others</td>
-                        <td className="px-4 py-3">Architecture & Quality</td>
-                        <td className="px-4 py-3">4-7 Years</td>
-                    </tr>
-                    <tr>
-                        <td className="px-4 py-3 font-medium text-slate-900">Level 4 (Staff)</td>
-                        <td className="px-4 py-3">Multi-team, sets technical direction</td>
-                        <td className="px-4 py-3">Company-wide tech strategy</td>
-                        <td className="px-4 py-3">7+ Years</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
   </div>
 );
 
 const HubProfile = ({ currentUser, onEdit }: { currentUser: User, onEdit: () => void }) => (
-  <div className="max-w-2xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden relative">
+  <div className="max-w-2xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden relative animate-in fade-in duration-500">
       <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
           <button 
             onClick={onEdit} 
@@ -1103,7 +1185,7 @@ const HubGroupDetail = ({ group, posts, users, events, onBack, currentUser, onCr
 
 // REFACTORED: HubCommunity (Events & Groups List)
 const HubCommunity = ({ groups, events, onJoinGroup, onCreateEvent, onSelectGroup }: { groups: Group[], events: Event[], onJoinGroup: (id: string) => void, onCreateEvent: () => void, onSelectGroup: (g: Group) => void }) => (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
         <div className="flex justify-between items-center">
             <div>
                 <h2 className="text-2xl font-bold text-slate-900">Community & Culture</h2>
@@ -1195,7 +1277,7 @@ const HubDirectory = ({ users, onSelectUser }: { users: User[], onSelectUser: (u
     const locations = ['All', ...Array.from(new Set(users.map(u => u.location)))];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center">
                     <h2 className="text-2xl font-bold text-slate-900">People Directory</h2>
@@ -1274,7 +1356,7 @@ const HubDirectory = ({ users, onSelectUser }: { users: User[], onSelectUser: (u
 };
 
 const HubDocs = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
         <h2 className="text-2xl font-bold text-slate-900">Documents</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {['Employee Handbook', 'Insurance Policy', 'Brand Guidelines', 'Holiday Calendar', 'Expense Policy'].map((doc, i) => (
@@ -1301,7 +1383,7 @@ const AdminPayroll = ({ users, entries, onUpdateEntry, onRunPayroll }: { users: 
     const avgSalary = Math.round(totalPayroll / (entries.length || 1));
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-900">Payroll Run</h2>
                 <button onClick={onRunPayroll} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
@@ -1368,7 +1450,7 @@ const AdminPayroll = ({ users, entries, onUpdateEntry, onRunPayroll }: { users: 
 
 // New: Admin Inbox / Workflows showing requests
 const AdminInbox = ({ requests, onApprove, onReject }: { requests: Request[], onApprove: (id:string)=>void, onReject: (id:string)=>void }) => (
-  <div className="space-y-6">
+  <div className="space-y-6 animate-in fade-in duration-500">
     <div className="flex items-center justify-between">
        <h2 className="text-2xl font-bold text-slate-900">Manager Inbox</h2>
        <div className="flex gap-2">
@@ -1441,7 +1523,7 @@ const AdminInbox = ({ requests, onApprove, onReject }: { requests: Request[], on
 );
 
 const AdminDashboard = ({ users, onPostAnnouncement }: { users: User[], onPostAnnouncement: () => void }) => (
-  <div className="space-y-6">
+  <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900">Admin Overview</h2>
           <button onClick={onPostAnnouncement} className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -1461,7 +1543,7 @@ const AdminPeople = ({ users, onAddUser, onSelectUser }: { users: User[], onAddU
     const [viewMode, setViewMode] = useState<'List' | 'Grid'>('List');
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-900">Directory</h2>
                 <div className="flex gap-2">
@@ -1533,7 +1615,7 @@ const AdminPerformance = ({ cycles, onStartCycle, users, currentUser }: { cycles
     const directReports = users.filter(u => u.managerId === currentUser.id);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-900">Performance Management</h2>
                 {activeTab === 'Cycles' && (
@@ -1640,8 +1722,9 @@ const AdminPerformance = ({ cycles, onStartCycle, users, currentUser }: { cycles
     );
 };
 
+// REFACTORED: AdminSettings with Webhooks
 const AdminSettings = ({ onAction }: { onAction: (action: string) => void }) => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
         <h2 className="text-2xl font-bold text-slate-900">Settings</h2>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
             <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
@@ -1667,17 +1750,17 @@ const AdminSettings = ({ onAction }: { onAction: (action: string) => void }) => 
             </div>
             <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
                 <div>
+                    <h3 className="font-medium text-slate-900 flex items-center gap-2"><Webhook size={18}/> Webhooks & Events</h3>
+                    <p className="text-sm text-slate-500 mt-1">Configure outbound events and API keys.</p>
+                </div>
+                <button onClick={() => onAction('settings-webhooks')} className="text-indigo-600 font-medium text-sm hover:underline">Manage</button>
+            </div>
+            <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
+                <div>
                     <h3 className="font-medium text-slate-900 flex items-center gap-2"><BillingIcon size={18}/> Billing & Plans</h3>
                     <p className="text-sm text-slate-500 mt-1">Manage invoices, payment methods and plan upgrades.</p>
                 </div>
                 <button className="text-indigo-600 font-medium text-sm hover:underline">View</button>
-            </div>
-             <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
-                <div>
-                    <h3 className="font-medium text-slate-900 flex items-center gap-2"><KeyIcon size={18}/> API Keys & Webhooks</h3>
-                    <p className="text-sm text-slate-500 mt-1">Developer settings for external integrations.</p>
-                </div>
-                <button className="text-indigo-600 font-medium text-sm hover:underline">Manage</button>
             </div>
              <div className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
                 <div>
@@ -1702,7 +1785,7 @@ const AdminOrg = ({ users, onReparent, readOnly = false }: { users: User[], onRe
         const isTarget = movingNodeId !== null && !isMoving;
         
         return (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center animate-in fade-in duration-300">
                 <div 
                     className={`border transition-all p-4 rounded-xl shadow-sm w-64 mb-8 relative z-10 flex flex-col items-center gap-3 ${
                         isMoving ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50' : 
@@ -1783,7 +1866,7 @@ const AdminOrg = ({ users, onReparent, readOnly = false }: { users: User[], onRe
     const roots = users.filter(u => !u.managerId);
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
+        <div className="space-y-6 h-full flex flex-col animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Organization Chart</h2>
@@ -1809,7 +1892,7 @@ const ITView = ({ page, tickets, assets, users, currentUser, onMoveTicket, onAdd
         const openTickets = tickets.filter((t: Request) => t.status !== 'Resolved').length;
         const availableAssets = assets.filter((a: Asset) => a.status === 'Available').length;
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in duration-500">
                 <h2 className="text-2xl font-bold text-slate-900">IT Overview</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <StatCard label="Open Tickets" value={openTickets} sub="Needs attention" icon={LifeBuoy} color="red" />
@@ -1822,7 +1905,7 @@ const ITView = ({ page, tickets, assets, users, currentUser, onMoveTicket, onAdd
     
     if (page === 'tickets') {
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in duration-500">
                 <h2 className="text-2xl font-bold text-slate-900">Support Tickets</h2>
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <table className="w-full text-left text-sm">
@@ -1862,7 +1945,7 @@ const ITView = ({ page, tickets, assets, users, currentUser, onMoveTicket, onAdd
 
     if (page === 'inventory') {
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in duration-500">
                 <div className="flex justify-between items-center">
                     <h2 className="text-2xl font-bold text-slate-900">Asset Inventory</h2>
                     <button onClick={onAddAsset} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
@@ -1914,7 +1997,7 @@ const ITView = ({ page, tickets, assets, users, currentUser, onMoveTicket, onAdd
 }
 
 const RecruitingJobs = ({ jobs, onPostJob }: { jobs: Job[], onPostJob: () => void }) => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900">Open Positions</h2>
           <button onClick={onPostJob} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
@@ -1967,7 +2050,7 @@ const RecruitingPipeline = ({ candidates, onAddCandidate, onMoveCandidate, onSel
     };
     
     return (
-        <div className="space-y-6 h-full flex flex-col">
+        <div className="space-y-6 h-full flex flex-col animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-900">Candidate Pipeline</h2>
                 <button onClick={onAddCandidate} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
@@ -2102,7 +2185,7 @@ const RecruitingPool = ({ candidates, onImportCandidate }: { candidates: Candida
   };
 
   return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
              <h2 className="text-2xl font-bold text-slate-900">Talent Acquisition</h2>
              <div className="flex bg-slate-200 p-1 rounded-lg">
@@ -2229,7 +2312,7 @@ const RecruitingPool = ({ candidates, onImportCandidate }: { candidates: Candida
 };
 
 const RecruitingDashboard = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
         <h2 className="text-2xl font-bold text-slate-900">Recruiting Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard label="Active Jobs" value="3" sub="2 Published" icon={Briefcase} color="indigo" />
@@ -2280,7 +2363,7 @@ const RecruitingDashboard = () => (
 );
 
 const CareerPageEditor = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-slate-900">Career Page Editor</h2>
             <button className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-slate-50">
@@ -2310,7 +2393,7 @@ const CareerPageEditor = () => (
 const AdminView = ({ page, users, currentUser, requests, payrollEntries, cycles, onAddUser, onPostAnnouncement, onSelectUser, onReparent, onRequestAction, onUpdatePayroll, onRunPayroll, onAction }: any) => {
     switch(page) {
         case 'dashboard': return <AdminDashboard users={users} onPostAnnouncement={onPostAnnouncement} />;
-        case 'inbox': return <AdminInbox requests={requests} onApprove={(id) => onRequestAction(id, 'Approved')} onReject={(id) => onRequestAction(id, 'Rejected')} />;
+        case 'inbox': return <AdminInbox requests={requests} onApprove={(id: string) => onRequestAction(id, 'Approved')} onReject={(id: string) => onRequestAction(id, 'Rejected')} />;
         case 'people': return <AdminPeople users={users} onAddUser={onAddUser} onSelectUser={onSelectUser} />;
         case 'performance': return <AdminPerformance cycles={cycles} onStartCycle={() => onAction('performance-cycle')} users={users} currentUser={currentUser} />;
         case 'payroll': return <AdminPayroll users={users} entries={payrollEntries} onUpdateEntry={onUpdatePayroll} onRunPayroll={onRunPayroll} />;
@@ -2353,7 +2436,7 @@ const HubView = ({ page, currentUser, users, posts, goals, skills, groups, group
     }
 };
 
-// --- APP SHELL --- (Identical structure, verifying wiring in render)
+// --- APP SHELL --- 
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -2388,6 +2471,7 @@ export default function App() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('Overview');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   // ... (Effects and Handlers same as before) ...
   useEffect(() => {
@@ -2428,7 +2512,6 @@ export default function App() {
   
   const showToast = (msg: string) => setToastMessage(msg);
 
-  // ... (Other handlers identical to previous) ...
   const handleRequestAction = (id: string, status: any) => {
       const request = requests.find(r => r.id === id);
       if (status === 'Approved' && request?.type === 'profile' && request.payload && request.requesterId) {
@@ -2554,6 +2637,7 @@ export default function App() {
     if (type === "Assign Asset" && selectedAssetId) setAssets(assets.map(a => a.id === selectedAssetId ? { ...a, status: 'In Use', assignedTo: form.elements.userId.value } : a));
     if (type === "New Event") setEvents([...events, { id: Date.now().toString(), title: form.elements.title.value, date: form.elements.date.value, time: form.elements.time.value, location: form.elements.location.value, type: form.elements.type.value }]);
     if (type === "Performance Cycle") setCycles([{ id: Date.now().toString(), title: form.elements.title.value, period: 'Upcoming', status: 'Draft', completion: 0, deadline: 'TBD' }, ...cycles]);
+    if (type === "Update Webhooks") showToast("Webhook configuration saved!");
   };
 
   const navItems = useMemo(() => {
@@ -2571,9 +2655,7 @@ export default function App() {
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans">
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
         <div className="p-6 flex items-center gap-2 border-b border-slate-50">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center p-1.5">
-             <SuiteLogo className="w-full h-full" />
-          </div>
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">HR</div>
           <span className="font-bold text-lg tracking-tight">Suite.io</span>
         </div>
         <div className="px-4 py-4">
@@ -2605,13 +2687,23 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
         <div className="max-w-6xl mx-auto p-8 h-full">
           {currentApp === 'hub' && <HubView page={activePage} currentUser={currentUser} users={users} posts={posts} goals={goals} skills={skills} groups={groups} groupPosts={groupPosts} events={events} timeEntries={timeEntries} onAction={handleAction} onAddGoal={() => setActiveModal('goal')} onSelectCoworker={handleSelectCoworker} onJoinGroup={handleJoinGroup} onSelectGroup={setActiveGroup} activeGroup={activeGroup} onBackFromGroup={() => setActiveGroup(null)} />}
           {currentApp === 'admin' && <AdminView page={activePage} currentUser={currentUser} users={users} requests={requests} payrollEntries={payrollEntries} cycles={cycles} onAddUser={() => setActiveModal('employee')} onPostAnnouncement={() => setActiveModal('announcement')} onSelectUser={handleSelectUser} onReparent={handleReparentUser} onRequestAction={handleRequestAction} onUpdatePayroll={handleUpdatePayroll} onRunPayroll={handleRunPayroll} onAction={handleAction} />}
           {currentApp === 'it' && <ITView page={activePage} tickets={requests.filter((r:Request) => r.type === 'ticket')} assets={assets} users={users} currentUser={currentUser} onMoveTicket={handleMoveTicket} onAddAsset={() => setActiveModal('asset')} onAssignAsset={handleAssetAssignStart} onReturnAsset={handleAssetReturn} />}
           {currentApp === 'recruiting' && <RecruitingView page={activePage} jobs={jobs} candidates={candidates} onPostJob={() => setActiveModal('job')} onAddCandidate={() => setActiveModal('candidate')} onMoveCandidate={handleMoveCandidate} onSelectCandidate={handleSelectCandidate} onImportCandidate={handleImportCandidate} />}
         </div>
+        
+        {/* Floating Assistant Button */}
+        <button 
+            onClick={() => setIsAssistantOpen(!isAssistantOpen)} 
+            className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-xl flex items-center justify-center transition-all z-40 hover:scale-110"
+        >
+            <Sparkles size={24} className={isAssistantOpen ? "fill-white" : ""}/>
+        </button>
+        <SmartAssistant isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
+
       </main>
 
        {/* --- MODALS --- */}
@@ -2660,6 +2752,44 @@ export default function App() {
                <div className="flex justify-between p-4 border rounded-lg items-center"><div className="flex gap-3 items-center"><div className="w-8 h-8 bg-black text-white rounded flex items-center justify-center">N</div><span className="font-bold text-sm">Notion</span></div><span className="text-xs text-green-600">Connected</span></div>
                <div className="flex justify-between p-4 border rounded-lg items-center"><div className="flex gap-3 items-center"><div className="w-8 h-8 bg-green-600 text-white rounded flex items-center justify-center">S</div><span className="font-bold text-sm">Slack</span></div><button className="text-xs text-indigo-600">Connect</button></div>
            </div>
+       </Modal>
+
+       <Modal isOpen={activeModal === 'settings-webhooks'} onClose={handleCloseModal} title="Webhooks Configuration">
+           <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Update Webhooks")}>
+               <div className="space-y-4">
+                   <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                       <div className="flex justify-between items-center mb-2">
+                           <span className="font-bold text-sm">Endpoint URL</span>
+                           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Active</span>
+                       </div>
+                       <input type="text" className="w-full border border-slate-300 rounded px-3 py-2 text-sm font-mono text-slate-600 bg-white" defaultValue="https://api.internal.company.com/webhooks/hr" />
+                   </div>
+                   
+                   <div>
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Subscribed Events</label>
+                       <div className="space-y-2">
+                           {['user.created', 'user.updated', 'absence.approved', 'job.application.created'].map(evt => (
+                               <label key={evt} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                                   <input type="checkbox" defaultChecked className="rounded text-indigo-600 focus:ring-indigo-500" />
+                                   {evt}
+                               </label>
+                           ))}
+                       </div>
+                   </div>
+                   
+                   <div className="pt-2 border-t border-slate-200">
+                       <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Signing Secret</label>
+                       <div className="flex gap-2">
+                           <input type="password" value="whsec_xxxxx" disabled className="flex-1 border border-slate-300 rounded px-3 py-2 text-sm bg-slate-100 text-slate-500" />
+                           <button type="button" className="px-3 py-2 border border-slate-300 rounded text-slate-600 hover:bg-slate-50"><Copy size={16}/></button>
+                       </div>
+                   </div>
+               </div>
+               <div className="flex justify-end gap-2 pt-2">
+                   <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+                   <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Save Configuration</button>
+               </div>
+           </form>
        </Modal>
        
        <Modal isOpen={activeModal === 'candidate-details'} onClose={handleCloseModal} title="Candidate Profile" size="xl">
@@ -2782,4 +2912,90 @@ export default function App() {
 
        <Modal isOpen={activeModal === 'candidate'} onClose={handleCloseModal} title="Add Candidate">
          <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "New Candidate")}>
-            <input name="name" type="
+            <input name="name" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Candidate Name" required/>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Add</button>
+            </div>
+         </form>
+       </Modal>
+
+      <Modal isOpen={activeModal === 'leave'} onClose={handleCloseModal} title="Request Leave">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Leave Request")}>
+            <select name="type" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Vacation</option><option>Sick Leave</option></select>
+            <div className="grid grid-cols-2 gap-4">
+               <input name="startDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
+               <input name="endDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
+            </div>
+         </form>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'expense'} onClose={handleCloseModal} title="Submit Expense">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Expense Report")}>
+            <input name="amount" type="number" step="0.01" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Amount" required/>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
+            </div>
+         </form>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'referral'} onClose={handleCloseModal} title="Refer a Friend">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Referral")}>
+            <input name="name" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Candidate Name" required/>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Submit</button>
+            </div>
+         </form>
+      </Modal>
+
+       <Modal isOpen={activeModal === 'ticket'} onClose={handleCloseModal} title="Create IT Ticket">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Ticket")}>
+            <textarea name="desc" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-32 bg-white text-slate-900" placeholder="Describe the issue..." required></textarea>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create</button>
+            </div>
+         </form>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'asset'} onClose={handleCloseModal} title="Add New Asset">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "New Asset")}>
+            <div className="grid grid-cols-2 gap-4">
+                <select name="assetType" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Laptop</option><option>Monitor</option><option>Phone</option></select>
+                <select name="status" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"><option>Available</option><option>In Use</option><option>Repair</option></select>
+            </div>
+            <input name="model" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Model" required/>
+            <div className="grid grid-cols-2 gap-4">
+                <input name="serialNumber" type="text" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" placeholder="Serial" required/>
+                <input name="purchaseDate" type="date" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required/>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Add</button>
+            </div>
+         </form>
+      </Modal>
+
+      <Modal isOpen={activeModal === 'assign-asset'} onClose={handleCloseModal} title="Assign Asset">
+         <form className="p-6 space-y-4" onSubmit={(e) => handleSubmit(e, "Assign Asset")}>
+            <select name="userId" className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white text-slate-900" required>
+                  <option value="">Select Employee</option>
+                  {users.map(u => (<option key={u.id} value={u.id}>{u.name}</option>))}
+            </select>
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg">Cancel</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Assign</button>
+            </div>
+         </form>
+      </Modal>
+
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+    </div>
+  );
+}

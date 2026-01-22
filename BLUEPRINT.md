@@ -3,233 +3,229 @@
 ## 1) SYSTEM ARCHITECTURE
 
 **Components & Data Flow:**
-*   **Frontend (SPA):** React + Tailwind + Vite. Communicates via REST/GraphQL.
-    *   *Zone 1: /hub* (Employee Self-Service)
-    *   *Zone 2: /admin* (High Privilege Console)
-    *   *Zone 3: /recruiting* (ATS & Hiring Manager view)
-*   **API Gateway / Backend:** Node.js (Express or Fastify). Enforces "Server-side enforcement first".
-*   **Auth Service:** Handles Identity, MFA, Session.
-*   **Core DB:** Relational Data (SQL).
-*   **Document Storage:** Blob storage with short-lived signed URLs.
-*   **Workflow Engine:** Embedded state machine in Backend.
 
-**Technology Decisions (Fast Build & Replit-Fit):**
+1.  **Frontend (The Shell):** Single Page Application (React/Vite).
+    *   **Router:** Splits immediately into 3 distinct zones (`/hub`, `/admin`, `/recruiting`).
+    *   **State:** React Context for Session/Auth, React Query for server state.
+    *   **Policy Engine (Client-side mirror):** Lightweight rule evaluator for immediate UI feedback (e.g., "You can't request 40 days off").
+2.  **API Layer (The Gatekeeper):**
+    *   **Auth:** Supabase Auth (JWT). Enforces RBAC via Middleware.
+    *   **Access Control:** "Server-side enforcement first". Checks `User.Role` + `User.Entity` + `Resource.Sensitivity` before every DB read/write.
+    *   **One Inbox:** Aggregates `approvals`, `tasks`, `signatures` into a single stream for the user.
+3.  **Database (The Truth):** PostgreSQL.
+    *   **Core:** Users, Org, Entities.
+    *   **Sensitive:** Compensation separate table with strict RLS (Row Level Security).
+    *   **Audit:** `audit_logs` table recording *every* mutation and sensitive read.
+4.  **Storage:** S3-compatible (Supabase Storage).
+    *   **Pattern:** All documents are private by default. Access via signed URLs (TTL 60s) generated only after permission check.
+5.  **Integrations (The Bus):**
+    *   **Webhooks:** Outbound events (`user.created`, `absence.requested`) sent to registered endpoints (Slack, Payroll).
 
-*   **Auth:** **Supabase Auth** (or Auth0).
-    *   *Why:* Handling secure sessions, password resets, and MFA yourself is a security risk and slow. Supabase Auth integrates row-level security (RLS) if needed later.
-*   **Database:** **PostgreSQL** (Managed via Supabase or Neon).
-    *   *Why:* Best-in-class for relational data, JSONB support for flexible schemas (policies/custom fields), and strict ACID compliance for Payroll/HR.
-*   **Storage:** **AWS S3** (or Supabase Storage).
-    *   *Why:* Industry standard, cheap, supports signed URLs for secure document access (e.g., contracts).
+**Decision Matrix (Fast Build Defaults):**
+*   **Auth:** **Supabase Auth**. *Reason:* Built-in MFA, session management, and Row-Level Security integration. Zero maintenance.
+*   **DB:** **PostgreSQL**. *Reason:* Relational integrity is non-negotiable for HR/Payroll. JSONB columns allow flexible "Custom Fields" without schema migrations.
+*   **Storage:** **Supabase Storage**. *Reason:* Integrated permissions, easy API.
 
-## 2) REPO / PROJECT STRUCTURE
+## 2) REPO / PROJECT STRUCTURE (Replit)
 
 **Folder Structure:**
 ```text
-/apps/web                # The React Frontend
-  /src
-    /features            # Domain-driven design
-      /hub               # Feed, Requests, Profile
-      /admin             # People, Payroll, Org, Workflows
-      /recruiting        # Kanban, Jobs, Scorecards
-      /shared            # UI Kit, Hooks, Utils
-    /layouts             # The 3 core layouts
-/apps/api                # The Node Backend
-  /src
-    /modules             # Modules matching frontend features
-    /middleware          # RBAC, Logging, Auth
-    /db                  # Migrations & Seeds
-/packages                # Shared Types/Utils
+/src
+  /features
+    /hub             # Employee Self-Service (Feed, Request, Profile)
+    /admin           # HR Console (People, Payroll, Workflows)
+    /recruiting      # ATS (Kanban, Scorecards)
+    /shared          # UI Kit (Buttons, Modals), Hooks
+  /lib
+    /api.ts          # Supabase client & fetch wrappers
+    /policy.ts       # The Rule Engine logic
+    /types.ts        # TypeScript definitions
+  /server            # (If using Replit Backend) or Supabase Edge Functions
+    /webhooks.ts
+    /audit.ts
 ```
 
 **URL Structure:**
-*   `/login`, `/reset-password`
-*   `/hub` (Dashboard), `/hub/me` (Profile), `/hub/time`, `/hub/docs`
-*   `/admin` (Dashboard), `/admin/people`, `/admin/payroll`, `/admin/workflows`
-*   `/recruiting/jobs`, `/recruiting/pipeline/{jobId}`, `/recruiting/candidates`
-*   `/careers/{slug}` (Public)
+*   **Hub:** `/hub/dashboard`, `/hub/me`, `/hub/team`, `/hub/time`, `/hub/growth`, `/hub/docs`
+*   **Admin:** `/admin/dashboard`, `/admin/people`, `/admin/org`, `/admin/payroll`, `/admin/workflows`, `/admin/settings`
+*   **Recruiting:** `/recruiting/dashboard`, `/recruiting/jobs`, `/recruiting/pipeline/:jobId`, `/recruiting/candidates/:id`
+*   **Public:** `/careers/:slug` (Public job board)
 
 **Environment Variables:**
-`DATABASE_URL`, `REDIS_URL` (optional for queues), `AUTH_SECRET`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `SMTP_HOST` (Email).
+`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `DATABASE_URL` (for migrations), `SERVICE_ROLE_KEY` (for admin scripts only).
 
 ## 3) UI INFORMATION ARCHITECTURE
 
 **A) Employee Hub (/hub)**
-*   **Sidebar:** Home, My Profile, Time & Absences, Documents, Company, Grow, Support.
-*   **Key Views:**
-    *   *Home:* Feed (Announcements), "Clock In" Widget, "Today's Team" status.
-    *   *My Profile:* Personal Info (Edit), Bank Data.
-    *   *Time:* Calendar View, Request Modal.
+*   **Nav:** Home, Profile, Time & Absence, Documents, Benefits, Company, Support.
+*   **Widgets:**
+    *   *Feed:* Company announcements mixed with automated kudos (new joiners, work anniversaries).
+    *   *Today:* "Clock In", "Who is away?", "My Open Tasks" (Inbox).
+    *   *Quick Actions:* Request Leave, Edit Bank Details, Create IT Ticket.
 
 **B) People Admin (/admin)**
-*   **Sidebar:** Dashboard, People Directory, Org Chart, Payroll, Time Tracking, Workflows, Reports, Settings.
-*   **Key Views:**
-    *   *People:* DataTable (filterable), Employee File (Tabs: Master Data, Salary, Docs).
-    *   *Payroll:* Monthly Run view, Variance Report.
-    *   *Org Chart:* D3/React-Flow Visualization.
+*   **Nav:** Cockpit, People, Org Structure, Payroll, Time/Absence, Workflows, Reports, Settings.
+*   **Views:**
+    *   *People:* High-density table. Filters: Entity, Location, Team, Status. Bulk Actions.
+    *   *Org Designer:* Drag-and-drop tree view.
+    *   *Payroll:* "Changes since last month" view (Variance Report).
 
 **C) Recruiting (/recruiting)**
-*   **Sidebar:** Dashboard, Jobs, Candidates, Talent Pool, Career Page Settings.
-*   **Key Views:**
-    *   *Pipeline:* Drag-and-drop Kanban (Applied -> Screen -> Interview -> Offer).
-    *   *Candidate Detail:* Resume viewer, Scorecard form, Email timeline.
+*   **Nav:** Jobs, Candidates, Talent Pool, Analytics.
+*   **Views:**
+    *   *Pipeline:* Kanban board (Applied -> Screening -> Interview -> Offer -> Hired).
+    *   *Candidate:* Split view (Resume PDF on left, Scorecard/Timeline on right).
 
 ## 4) CORE FLOWS (Happy Path)
 
 **A) Absence Request:**
-1.  Employee: `/hub/time` -> Click "Request Absence" -> Form (Type: Vacation, Dates: Mon-Fri).
-2.  Backend: Check Policy (Enough balance? Blocked dates?). Create `absence_request` (status: pending).
-3.  Workflow: Determine Approver (Manager). Create `inbox_item` for Manager.
-4.  Manager: `/hub` -> Inbox -> Click "Approve".
-5.  Backend: Update status: `approved`. Deduct balance. Sync to `team_calendar`.
+1.  Employee (Hub): Clicks "Request Time Off". Selects "Vacation", "Aug 1 - Aug 10".
+2.  System: Runs `resolve_policy(user, 'absence')`. Checks balance.
+3.  System: Creates `request`. Triggers `workflow`.
+4.  Workflow: Assigns task to `user.manager`.
+5.  Manager (Inbox): Sees notification. Clicks "Approve".
+6.  System: Updates `request` -> 'Approved'. Deducts balance. Writes to `audit_log`. Syncs to `team_calendar`.
 
-**F) Recruiting Process:**
-1.  Recruiter: `/recruiting` -> Create Job "Frontend Dev". Publish.
-2.  Candidate: Visits Public Page -> Fills Form -> Uploads PDF.
-3.  System: Create `candidate`, `application`. Parse PDF (optional). Move to "Applied".
-4.  Recruiter: Drags card to "Interview".
-5.  Interviewer: Notification -> Fills `scorecard`.
-6.  Recruiter: Move to "Offer" -> Generate PDF from Template -> Send via Docusign integration (or internal sign).
+**B) Onboarding:**
+1.  HR (Admin): Moves candidate to "Hired". Clicks "Start Onboarding".
+2.  System: Copies data to `users`. Sets status 'Onboarding'.
+3.  Workflow: Generates `tasks` based on `onboarding_checklist`:
+    *   IT: "Provision Laptop"
+    *   Manager: "Schedule 1:1"
+    *   Employee: "Upload ID", "Sign Contract".
+4.  Employee (Hub): Logs in. Sees "Welcome Aboard" wizard with task list.
+
+**F) Recruiting:**
+1.  Hiring Manager: Creates Job Requisition.
+2.  Recruiter: Reviews & Publishes to Career Page.
+3.  Candidate: Applies.
+4.  Recruiter: Drags to "Interview". Auto-emails candidate. Assigns Interviewers.
+5.  Interviewers: Fill Scorecards.
+6.  Recruiter: Generates Offer Letter (PDF). Sends for e-signature.
 
 ## 5) DATA MODEL (SQL) & ACCESS CONTROL
 
-**Access Control Strategy:**
-*   **RBAC:** `roles` (admin, hr, manager, employee). `permissions` (can_view_salary, can_approve_time).
-*   **ABAC:** Dynamic checks in code/middleware. `canAccess = (user.role === 'hr' && user.entity === target.entity) || user.id === target.id`.
-
-**DDL (PostgreSQL Flavor):**
+**Access Control:**
+*   **RBAC:** `roles` table.
+*   **ABAC:** Logic in API: `allow if (user.role == 'hr' AND user.legal_entity == target.legal_entity)`.
+*   **Field Level:** `compensation` table is strictly 1:1 with user, only readable by `user` (own) or `hr/finance` (scoped).
 
 ```sql
--- CORE HR
-CREATE TABLE legal_entities (id UUID PRIMARY KEY, name TEXT, country_code TEXT);
-CREATE TABLE departments (id UUID PRIMARY KEY, name TEXT, cost_center TEXT);
-
+-- CORE & ORG
+CREATE TABLE legal_entities (id UUID PRIMARY KEY, name TEXT, country TEXT, currency TEXT);
+CREATE TABLE teams (id UUID PRIMARY KEY, name TEXT, lead_id UUID, parent_team_id UUID);
 CREATE TABLE users (
     id UUID PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE,
     legal_entity_id UUID REFERENCES legal_entities,
-    department_id UUID REFERENCES departments,
+    team_id UUID REFERENCES teams,
     manager_id UUID REFERENCES users,
-    role TEXT NOT NULL DEFAULT 'employee', -- simplified for fast build
-    first_name TEXT,
-    last_name TEXT,
-    start_date DATE,
-    status TEXT -- active, onboarding, terminated
+    role TEXT CHECK (role IN ('employee', 'manager', 'hr', 'recruiter', 'admin')),
+    status TEXT, -- active, onboarding, terminated
+    first_name TEXT, last_name TEXT,
+    avatar_url TEXT,
+    start_date DATE
 );
 
--- SENSITIVE DATA (Field Level Protection via separate table)
+-- SENSITIVE (Strict Permissions)
 CREATE TABLE compensation (
-    user_id UUID REFERENCES users PRIMARY KEY,
-    base_salary INTEGER, -- in cents
-    currency TEXT,
-    effective_date DATE,
-    variable_bonus_percent DECIMAL
+    user_id UUID PRIMARY KEY REFERENCES users,
+    base_salary_cents INT,
+    variable_bonus_percent INT,
+    effective_date DATE
 );
 
--- TIME & ABSENCE
-CREATE TABLE time_entries (
+-- TIME & ABSENCE (Policy Engine Support)
+CREATE TABLE time_policies (
+    id UUID PRIMARY KEY,
+    name TEXT, -- "DE Standard", "US Remote"
+    legal_entity_id UUID REFERENCES legal_entities,
+    rules JSONB -- { "allow_negative": false, "days_per_year": 30 }
+);
+CREATE TABLE absences (
     id UUID PRIMARY KEY,
     user_id UUID REFERENCES users,
-    start_at TIMESTAMP,
-    end_at TIMESTAMP,
-    break_minutes INT
+    type TEXT, -- vacation, sick, parental
+    start_date DATE, end_date DATE,
+    status TEXT, -- pending, approved
+    approver_id UUID
 );
 
-CREATE TABLE absence_policies (
-    id UUID PRIMARY KEY,
-    name TEXT, -- e.g. "DE Vacation"
-    entitlement_days INT,
-    requires_approval BOOLEAN
-);
-
-CREATE TABLE absence_requests (
-    id UUID PRIMARY KEY,
-    user_id UUID REFERENCES users,
-    policy_id UUID REFERENCES absence_policies,
-    start_date DATE,
-    end_date DATE,
-    status TEXT, -- pending, approved, rejected
-    approver_id UUID REFERENCES users
-);
-
--- RECRUITING
-CREATE TABLE jobs (
-    id UUID PRIMARY KEY,
-    title TEXT,
-    department_id UUID,
-    hiring_manager_id UUID REFERENCES users,
-    status TEXT -- draft, published, closed
-);
-
-CREATE TABLE candidates (
-    id UUID PRIMARY KEY,
-    email TEXT,
-    full_name TEXT,
-    resume_url TEXT
-);
-
-CREATE TABLE applications (
-    id UUID PRIMARY KEY,
-    job_id UUID REFERENCES jobs,
-    candidate_id UUID REFERENCES candidates,
-    stage TEXT, -- applied, screening, interview, offer, hired
-    current_score DECIMAL
-);
-
--- WORKFLOW / INBOX
+-- WORKFLOWS & INBOX
 CREATE TABLE inbox_items (
     id UUID PRIMARY KEY,
     assignee_id UUID REFERENCES users,
-    reference_type TEXT, -- 'absence_request', 'offer_approval'
-    reference_id UUID,
-    status TEXT, -- pending, completed
+    title TEXT,
+    related_entity_type TEXT, -- 'absence', 'onboarding_task', 'approval'
+    related_entity_id UUID,
+    status TEXT, -- open, completed
     due_at TIMESTAMP
+);
+
+-- RECRUITING (ATS)
+CREATE TABLE jobs (id UUID PRIMARY KEY, title TEXT, status TEXT, hiring_manager_id UUID);
+CREATE TABLE candidates (id UUID PRIMARY KEY, job_id UUID, name TEXT, stage TEXT);
+CREATE TABLE scorecards (
+    id UUID PRIMARY KEY, 
+    candidate_id UUID, 
+    interviewer_id UUID, 
+    score INT, 
+    feedback TEXT
+);
+
+-- AUDIT
+CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY,
+    actor_id UUID,
+    action TEXT, -- 'update_salary', 'view_contract'
+    resource_type TEXT,
+    resource_id UUID,
+    changes JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
-## 6) WORKFLOW ENGINE
+## 6) WORKFLOW ENGINE + ONE INBOX
 
-*   **Structure:** No complex BPMN engine. Use a `state_machine` definition in code.
-*   **Database:** `workflow_logs` table to track who approved what and when.
+*   **Model:** `inbox_items` is the central aggregator.
 *   **Logic:**
-    *   Trigger: Event (e.g., `ABSENCE_REQUESTED`).
-    *   Resolver: Function `getApprover(requester)` -> returns Manager ID.
-    *   Action: Insert row into `inbox_items`.
+    *   When `absence_request` is created -> Trigger `create_approval_task`.
+    *   `create_approval_task`: Find Manager. Insert into `inbox_items`. Send Email.
+    *   When Manager acts: Update `inbox_item` -> 'done'. Update `absence_request` -> 'approved'.
+*   **One Inbox UI:** A single list showing Approvals, assigned Onboarding Tasks, and Document Signatures.
 
 ## 7) POLICY ENGINE
 
-*   **Logic:** A standardized "Resolver" function.
-    *   `resolvePolicy(user, type)`: Looks up `users.legal_entity` -> finds matching policy in `absence_policies`.
-*   **Example (Time Off):**
-    *   If `user.country == 'DE'`, use Policy A (30 days, doctor note after 3 days).
-    *   If `user.country == 'US'`, use Policy B (Unlimited, approval required).
+*   **Concept:** Decouple rules from code.
+*   **Resolver Function:** `get_policy(user, type)`.
+    *   Query: `SELECT * FROM policies WHERE entity_id = user.entity_id AND type = 'absence'`.
+*   **Interpreter:**
+    *   Rule: `requires_certificate_after_days: 3`.
+    *   Logic: `if (duration > policy.rules.requires_certificate_after_days) require_attachment = true`.
 
 ## 8) PRIVACY & COMPLIANCE
 
-*   **Retention:** Cron job running daily. `DELETE FROM candidates WHERE created_at < NOW() - INTERVAL '6 MONTHS'`.
-*   **Audit:** Global `audit_logs` table.
-    *   Columns: `actor_id`, `resource_type`, `resource_id`, `action` (view, update, delete), `changes` (JSON diff), `ip_address`.
-    *   **Strict rule:** EVERY Write operation writes to Audit. Sensitive Reads (Salary) write to Audit.
+*   **Retention:** Daily Job: `DELETE FROM candidates WHERE created_at < NOW() - INTERVAL '6 MONTHS' AND status = 'Rejected'`.
+*   **DSAR:** Script to export `users` + `time_entries` + `documents` to ZIP.
+*   **Anonymity:** In Surveys, `IF count(responses) < 5 THEN show 'Insufficient Data'`.
 
 ## 9) INTEGRATIONS BLUEPRINT
 
-*   **Architecture:** Event Bus pattern.
-*   **Events:** `USER_CREATED`, `ABSENCE_APPROVED`, `JOB_PUBLISHED`.
-*   **Implementation:**
-    *   Internal table `webhook_subscriptions` (url, event_types, secret).
-    *   Background worker picks up events and POSTs payload to registered URLs with retry logic (exponential backoff).
+*   **Table:** `webhooks` (url, secret, events: `['user.created', 'job.published']`).
+*   **Retry Logic:** Exponential backoff (1m, 5m, 1h) stored in `webhook_deliveries` table.
+*   **API Keys:** Scoped access. `headers: { 'Authorization': 'Bearer sk_...' }`.
 
 ## 10) "FAST BUILD" CHECKLIST
 
-1.  **Init:** Setup Repo, Typescript, Tailwind, Linter.
-2.  **DB:** Docker compose for Postgres or connect to Neon/Supabase. Run DDL.
-3.  **Auth:** Implement Login Page + JWT handling/Session context.
-4.  **Layouts:** Build the Shells (Sidebar + Topbar) for Hub, Admin, Recruiting.
-5.  **Core HR:** Build "Employee List" and "Profile Edit" (Read/Write users table).
-6.  **Hub Home:** Feed UI + "Clock In" button (stubbed).
-7.  **Time Off:** Request Modal + Database Insert + Admin Approval View.
-8.  **Org Chart:** Visualization component using `users.manager_id`.
-9.  **ATS:** Job Creation Form + Public Job Board (read-only).
-10. **ATS Pipeline:** Drag-and-Drop Kanban for candidates.
-11. **RBAC:** Add Middleware/HOC to protect `/admin` routes.
-12. **Audit:** Add `logAudit()` hook to all mutations.
+1.  **Setup:** Replit Node/React template.
+2.  **DB Schema:** Run the provided SQL.
+3.  **Auth:** Wrap App in Supabase Auth Provider.
+4.  **Layouts:** Create `HubLayout`, `AdminLayout`, `RecruitingLayout` components.
+5.  **Nav:** Implement the 3 sidebars.
+6.  **Hub Home:** Build Feed and Quick Actions.
+7.  **Directory:** Grid view of `users`.
+8.  **Profile:** Read/Write form for `users` table.
+9.  **Time:** Calendar view + Request Modal (write to `absences`).
+10. **Inbox:** List view of `inbox_items` with "Approve/Reject" buttons.
+11. **Recruiting:** Kanban board (drag & drop updates `candidates.stage`).
+12. **Audit:** Add `useEffect` hook to log page views (simplified) or API middleware (better).
